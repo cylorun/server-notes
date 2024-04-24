@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -17,7 +19,7 @@ public class WorldNotesFrame extends JFrame {
     private JTextField nicknameField;
 
     public WorldNotesFrame() {
-        super("Options");
+        super("World Notes");
         JLabel sheetIdLabel = new JLabel("Sheet ID:");
         JLabel sheetNameLabel = new JLabel("Sheet Name:");
         JLabel nicknameLabel = new JLabel("Nickname:");
@@ -34,41 +36,82 @@ public class WorldNotesFrame extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        add(sheetIdLabel, gbc);
+        this.add(sheetIdLabel, gbc);
         gbc.gridy++;
-        add(sheetNameLabel, gbc);
+        this.add(sheetNameLabel, gbc);
         gbc.gridy++;
-        add(nicknameLabel, gbc);
+        this.add(nicknameLabel, gbc);
 
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        add(sheetIdField, gbc);
+        this.add(sheetIdField, gbc);
         gbc.gridy++;
-        add(sheetNameField, gbc);
+        this.add(sheetNameField, gbc);
         gbc.gridy++;
-        add(nicknameField, gbc);
+        this.add(nicknameField, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
         gbc.gridwidth = 2;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
-        add(saveButton, gbc);
+        this.add(saveButton, gbc);
 
-        saveButton.addActionListener(new ActionListener() {
+        saveButton.addActionListener(e -> saveOptions());
+
+        loadOptions();
+        Options options = Options.getInstance();
+        this.setSize(400, 200);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLocation(options.win_x, options.win_y);
+        this.setResizable(false);
+        this.setVisible(true);
+
+        this.addWindowListener(new WindowListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                saveOptions();
+            public void windowOpened(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                Options options = Options.getInstance();
+                options.win_x = e.getWindow().getX();
+                options.win_y = e.getWindow().getY();
+                Options.save();
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+
             }
         });
 
-        loadOptions();
+    }
 
-        setSize(400, 200);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setVisible(true);
+    public String askName() {
+        return JOptionPane.showInputDialog(this, "Input the name for this location");
     }
 
     private void loadOptions() {

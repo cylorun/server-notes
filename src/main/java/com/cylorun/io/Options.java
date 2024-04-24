@@ -17,6 +17,9 @@ public class Options {
     public String sheet_name = "Coords";
     public String nickname = "User";
 
+    public int win_y;
+    public int win_x;
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = Paths.get("config.json");
     private static Options instance;

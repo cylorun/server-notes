@@ -29,13 +29,11 @@ public class Main {
                 List<Object> data = new ArrayList<>();
 
                 Toolkit.getDefaultToolkit().beep();
-                System.out.println("Give this location a name OR 1 to cancel");
-                String name = new Scanner(System.in).nextLine();
-                if (name.equals("1")) {
-                    System.out.println("Cancelled");
+                String name = frame.askName();
+
+                if(name == null) {
                     return;
                 }
-
                 String dimension = getDimension(s);
                 data.add(Options.getInstance().nickname);
                 data.add(dimension);
