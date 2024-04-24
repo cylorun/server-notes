@@ -1,4 +1,4 @@
-package com.cylorun;
+package com.cylorun.io;
 
 import javax.sound.sampled.Clip;
 import java.awt.*;

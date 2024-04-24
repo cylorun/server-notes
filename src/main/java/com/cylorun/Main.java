@@ -1,51 +1,63 @@
 package com.cylorun;
 
 import com.cylorun.gui.WorldNotesFrame;
+import com.cylorun.io.ClipboardReader;
+import com.cylorun.io.Options;
+import com.cylorun.sheets.GoogleSheetsClient;
+import com.cylorun.util.ExceptionUtil;
 import com.formdev.flatlaf.FlatDarculaLaf;
-import com.google.gson.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
-import java.nio.file.*;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 public class Main {
-    public static final Path OUTPUT_PATH = Paths.get("output.json");
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static void main(String[] args) throws UnsupportedLookAndFeelException {
         UIManager.setLookAndFeel(new FlatDarculaLaf());
-        new WorldNotesFrame();
-         new ClipboardReader(s -> {
-            if (isF3c(s)) {
-                JsonObject o = loadJson(OUTPUT_PATH);
+        WorldNotesFrame frame = new WorldNotesFrame();
 
+        new ClipboardReader(s -> {
+            if (isF3c(s)) {
                 int[] coords = getCoords(s);
+                List<Object> data = new ArrayList<>();
 
                 Toolkit.getDefaultToolkit().beep();
                 System.out.println("Give this location a name OR 1 to cancel");
                 String name = new Scanner(System.in).nextLine();
-                if (name.equals("1")) return;
-
-                if (o == null) {
-                    o = new JsonObject();
-                    o.add("overworld", new JsonObject());
-                    o.add("the_nether", new JsonObject());
-                    o.add("the_end", new JsonObject());
+                if (name.equals("1")) {
+                    System.out.println("Cancelled");
+                    return;
                 }
 
                 String dimension = getDimension(s);
-                JsonObject dimensionObject = o.getAsJsonObject(dimension);
-                dimensionObject.addProperty(name, gson.toJson(coords).replaceAll("\\s", "").strip());
+                data.add(Options.getInstance().nickname);
+                data.add(dimension);
+                data.add(Arrays.toString(coords));
+                data.add(name);
 
-                writeJson(o, OUTPUT_PATH);
+                try {
+                    GoogleSheetsClient.appendRowTop(data);
+                } catch (IOException | GeneralSecurityException e) {
+                    ExceptionUtil.showError(new Exception("Something went wrong when trying to push the data, probably wrong sheetID or sheetName\n" + e));
+                    throw new RuntimeException(e);
+                }
+
             }
         });
     }
 
     public static boolean isF3c(String s) {
-        return s.contains("/execute");
+//        String regex = "^\\/execute in minecraft:[^ ]+ run tp @s -?\\d+(\\.\\d+)? -?\\d+(\\.\\d+)? -?\\d+(\\.\\d+)? \\d+(\\.\\d+)? \\d+(\\.\\d+)? .+$\n";
+//        Pattern pattern = Pattern.compile(regex);
+//        return pattern.matcher(s).find();
+        return s.contains("/execute in minecraft");
     }
 
     public static String getDimension(String s) {
@@ -62,24 +74,4 @@ public class Main {
         return res;
     }
 
-    public static JsonObject loadJson(Path path) {
-        try {
-            if (Files.exists(path)) {
-                try (FileReader reader = new FileReader(path.toFile())) {
-                    return JsonParser.parseReader(reader).getAsJsonObject();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static void writeJson(JsonObject jsonObject, Path path) {
-        try (FileWriter writer = new FileWriter(path.toFile())) {
-            gson.toJson(jsonObject, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

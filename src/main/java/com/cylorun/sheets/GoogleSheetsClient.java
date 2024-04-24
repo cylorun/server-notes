@@ -1,6 +1,7 @@
 package com.cylorun.sheets;
 
 
+import com.cylorun.io.Options;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -14,8 +15,6 @@ import java.util.List;
 
 public class GoogleSheetsClient {
 
-    private static final String sheetId = "";
-    private static final String sheetName = "Coords";
     public static void appendRowTop(List<Object> rowData) throws IOException, GeneralSecurityException {
         insert(rowData, 3, false);
     }
@@ -23,13 +22,16 @@ public class GoogleSheetsClient {
     public static void insert(List<Object> rowData, int row, boolean overwrite) throws GeneralSecurityException, IOException {
         Sheets sheetsService = GoogleSheetsService.getSheetsService();
         String range = String.format("A%s:CG", row);
-
+        String sheetId = Options.getInstance().sheet_id;
+        ;
+        String sheetName = Options.getInstance().sheet_name;
         if (overwrite) {
             ValueRange newRow = new ValueRange().setValues(Arrays.asList(rowData));
             UpdateValuesResponse res = sheetsService.spreadsheets().values()
                     .update(sheetId, range, newRow)
                     .setValueInputOption("RAW")
                     .execute();
+
             return;
         }
 
