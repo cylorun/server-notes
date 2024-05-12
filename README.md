@@ -1,6 +1,7 @@
 # Server-notes
 
-
+# IMPORTANT
+- It requires a credentials.json file containing credentials for a google service account, with Google Sheets API and Google Drive API 
 
 # Usage
 
